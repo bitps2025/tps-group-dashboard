@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPS Group · CEO Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0a1f52;--navy2:#112466;
+  --blue:#1e6fd9;--blue-lt:#3b82f6;--blue-pale:#dbeafe;--blue-soft:#eff6ff;
+  --cyan:#0891b2;--indigo:#4f46e5;
+  --bg:#f0f4fa;--surface:#fff;--surface2:#f7f9fc;--surface3:#eef2f8;
+  --border:#e2e8f0;
+  --green:#059669;--green-bg:#ecfdf5;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --amber:#d97706;--amber-bg:#fffbeb;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
+  --shadow:0 1px 4px rgba(10,31,82,.07),0 2px 12px rgba(10,31,82,.05);
+  --shadow-lg:0 4px 24px rgba(10,31,82,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0}
+body{font-family:'Inter','Sarabun',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+.shell{display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+.hdr{background:var(--navy);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:300;box-shadow:0 2px 20px rgba(10,31,82,.4);flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-div{width:1px;height:26px;background:rgba(255,255,255,.16);margin:0 4px}
+.hdr-title{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.2px}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.09);padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.12)}
+.dot{width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hdr-date{font-size:10px;color:rgba(255,255,255,.35)}
+.body-wrap{display:flex;flex:1;overflow:hidden}
+.sidebar{width:214px;flex-shrink:0;background:var(--navy2);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.06);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.sb-sec{padding:18px 16px 7px;font-size:9px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;transition:all .18s;margin:2px 8px;border-radius:8px;border-left:3px solid transparent}
+.nav-item:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.07)}
+.nav-item.active{color:#fff;background:rgba(59,130,246,.18);border-left-color:#3b82f6;font-weight:600}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-period{font-size:11px;color:rgba(255,255,255,.38);line-height:1.6}
+.content{flex:1;overflow-y:auto;min-width:0}
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fl{display:flex;align-items:center;gap:6px}
+.flbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+select{appearance:none;-webkit-appearance:none;background:var(--surface2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;border:1px solid var(--border);border-radius:var(--radius-xs);padding:5px 24px 5px 9px;font-size:12px;font-family:'Inter','Sarabun',sans-serif;color:var(--text);cursor:pointer;min-width:108px}
+select:focus{outline:none;border-color:var(--blue-lt);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.fsep{width:1px;height:16px;background:var(--border)}
+.btn-reset{padding:5px 11px;border-radius:var(--radius-xs);border:1px solid var(--border);background:transparent;font-size:11px;color:var(--text3);cursor:pointer}
+.btn-reset:hover{border-color:var(--blue-lt);color:var(--blue)}
+.main{padding:20px 22px;max-width:1280px}
+.section{display:none}.section.active{display:block}
+.banner{background:linear-gradient(135deg,var(--navy) 0%,#1450a3 55%,var(--blue) 100%);border-radius:var(--radius);padding:22px 26px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:0 4px 28px rgba(10,31,82,.22)}
+.banner::before{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.05)}
+.banner-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+.b-lbl{font-size:9px;color:rgba(255,255,255,.6);margin-bottom:4px;text-transform:uppercase;letter-spacing:1.2px}
+.b-title{font-size:21px;font-weight:700;letter-spacing:-.3px;color:#fff}
+.b-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+.bkpis{display:grid;grid-template-columns:repeat(3,1fr);gap:0;align-items:center;min-width:300px}
+.bkpi{text-align:center;padding:0 18px;border-left:1px solid rgba(255,255,255,.18)}
+.bkpi:first-child{border-left:none}
+.bkpi-val{font-size:24px;font-weight:700;line-height:1;color:#fff;letter-spacing:-.5px;white-space:nowrap}
+.bkpi-lbl{font-size:10px;color:rgba(255,255,255,.85);margin-top:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.bkpi-ch{font-size:11px;margin-top:3px;color:#93c5fd;font-weight:500}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:16px}
+.kpi-card{background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);padding:14px 13px;box-shadow:var(--shadow);transition:transform .18s,border-color .18s}
+.kpi-card:hover{transform:translateY(-2px);border-color:var(--blue-lt);box-shadow:var(--shadow-lg)}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:9px}
+.kpi-val{font-size:19px;font-weight:700;line-height:1;letter-spacing:-.3px}
+.kpi-lbl{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+.kpi-sub{font-size:11px;margin-top:3px;color:var(--text2)}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.1px}
+.card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:13px;margin-bottom:16px}
+.ch180{position:relative;height:180px}.ch200{position:relative;height:200px}.ch240{position:relative;height:240px}.ch260{position:relative;height:260px}.ch300{position:relative;height:300px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--surface3)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--blue-soft)}
+.tbl-scroll{overflow-x:auto;max-height:360px;overflow-y:auto}
+.rank{font-weight:700;color:var(--text3);font-size:11px}
+.cell-name{font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600}
+.st-dead{background:#fee2e2;color:#dc2626}
+.st-low{background:#fef3c7;color:#d97706}
+.st-ok{background:#dcfce7;color:#16a34a}
+.st-over{background:#dbeafe;color:#2563eb}
+.stock-bar-wrap{display:flex;gap:2px;height:28px;border-radius:8px;overflow:hidden;margin-bottom:8px}
+.stock-bar-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;transition:all .3s;min-width:2px;cursor:default}
+.alert{border-radius:var(--radius-xs);padding:9px 12px;display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:12px}
+.alert-icon{font-size:13px;line-height:1.5;flex-shrink:0}
+.alert-warn{background:var(--amber-bg);border-left:3px solid var(--amber)}
+.alert-danger{background:var(--red-bg);border-left:3px solid var(--red)}
+.alert-ok{background:var(--green-bg);border-left:3px solid var(--green)}
+.alert-info{background:var(--blue-soft);border-left:3px solid var(--blue-lt)}
+.a-title{font-weight:600;margin-bottom:1px;font-size:12px;color:var(--text)}
+.a-sub{font-size:11px;color:var(--text2)}
+.co-toggle{display:flex;gap:5px;margin-bottom:11px}
+.co-btn{padding:4px 11px;border-radius:var(--radius-xs);border:1px solid var(--border);background:transparent;font-size:11px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .18s}
+.co-btn:hover{border-color:var(--blue-lt);color:var(--blue)}
+.co-btn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-dot{width:8px;height:8px;border-radius:2px;background:var(--blue);flex-shrink:0}
+.sec-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.sec-period{font-size:11px;color:var(--blue);margin-left:auto;background:var(--blue-soft);padding:3px 10px;border-radius:20px;border:1px solid var(--blue-pale);font-weight:500}
+.footer{text-align:center;padding:18px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)}
+.stat-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.stat-box-val{font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.stat-box-lbl{font-size:10px;color:var(--text3);margin-top:5px;text-transform:uppercase;letter-spacing:.4px}
+.stat-box-sub{font-size:11px;margin-top:3px;color:var(--text2)}
+
+/* ── Loading overlay ── */
+#loading-overlay{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s}
+#loading-overlay.hidden{opacity:0;pointer-events:none}
+.loader-ring{width:48px;height:48px;border:3px solid rgba(255,255,255,.15);border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:rgba(255,255,255,.6);letter-spacing:.3px}
+.loader-sub{font-size:11px;color:rgba(255,255,255,.3)}
+/* ── Error banner ── */
+#data-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin:12px 22px;font-size:12px;color:#991b1b}
+#data-error b{display:block;margin-bottom:3px}
+
+@media(max-width:768px){
+  .body-wrap{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:row;overflow-x:auto;flex-wrap:nowrap;padding:6px}
+  .sb-sec,.sb-bottom{display:none}
+  .nav-item{border-left:none;border-bottom:3px solid transparent;padding:8px 11px;flex-direction:column;gap:3px;font-size:11px;min-width:68px;text-align:center;margin:2px 3px}
+  .nav-item.active{border-bottom-color:#3b82f6;border-left:none}
+  .g2,.g21,.g3{grid-template-columns:1fr}
+  .kpi-grid,.stat-boxes{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="loader-ring"></div>
+  <div class="loader-txt">กำลังโหลดข้อมูล...</div>
+  <div class="loader-sub" id="loader-status">เชื่อมต่อ CSV files</div>
+</div>
+
+<div class="shell">
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-div"></div>
+    <div><div class="hdr-title">CEO Dashboard</div><div class="hdr-sub">Thai Phasith &amp; TPS Bearing Group</div></div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="dot"></div>Live Data</div>
+    <div class="hdr-date" id="hdrDate"></div>
+  </div>
+</div>
+<div class="body-wrap">
+<div class="sidebar">
+  <div class="sb-sec">Analytics</div>
+  <div class="nav-item active" onclick="showTab('s1',this)"><span class="nav-icon">★</span>Executive Summary</div>
+  <div class="nav-item" onclick="showTab('s2',this)"><span class="nav-icon">📈</span>Sales Analysis</div>
+  <div class="nav-item" onclick="showTab('s3',this)"><span class="nav-icon">👥</span>Customer Analysis</div>
+  <div class="nav-item" onclick="showTab('s4',this)"><span class="nav-icon">📦</span>Inventory &amp; Stock</div>
+  <div class="nav-item" onclick="showTab('s5',this)"><span class="nav-icon">💰</span>Cash Flow</div>
+  <div class="sb-bottom"><div class="sb-period" id="sbPeriod">ภาพรวมทั้งหมด</div></div>
+</div>
+<div class="content">
+<div id="data-error"><b>⚠️ ไม่สามารถโหลดข้อมูลได้</b><span id="error-msg"></span></div>
+<div class="filter-bar">
+  <div class="fl"><span class="flbl">บริษัท</span>
+    <select id="f_co" onchange="applyFilters()">
+      <option value="ALL">ทั้งหมด</option>
+      <option value="THSITH">Thai Phasith</option>
+      <option value="TPS">TPS Bearing</option>
+    </select>
+  </div>
+  <div class="fsep"></div>
+  <div class="fl"><span class="flbl">ปี</span>
+    <select id="f_yr" onchange="applyFilters()">
+      <option value="ALL">ทุกปี</option>
+    </select>
+  </div>
+  <div class="fsep"></div>
+  <div class="fl"><span class="flbl">ไตรมาส</span>
+    <select id="f_q" onchange="applyFilters()">
+      <option value="ALL">ทุก Q</option>
+      <option value="1">Q1</option><option value="2">Q2</option>
+      <option value="3">Q3</option><option value="4">Q4</option>
+    </select>
+  </div>
+  <div class="fsep"></div>
+  <div class="fl"><span class="flbl">เดือน</span>
+    <select id="f_mo" onchange="applyFilters()">
+      <option value="ALL">ทุกเดือน</option>
+      <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+      <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+      <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+      <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+    </select>
+  </div>
+  <div class="fsep"></div>
+  <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+  <div id="fLabel" style="font-size:11px;color:var(--text3);margin-left:auto"></div>
+</div>
+<div class="main">
+
+<!-- S1 -->
+<div class="section active" id="s1">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">Executive Summary</div><div class="sec-period" id="s1p">ภาพรวมทั้งหมด</div></div>
+  <div class="banner">
+    <div class="banner-row">
+      <div>
+        <div class="b-lbl">Revenue Overview</div>
+        <div class="b-title" id="b_co">Thai Phasith &amp; TPS Bearing</div>
+        <div class="b-sub" id="b_per">กำลังโหลด...</div>
+      </div>
+      <div class="bkpis">
+        <div class="bkpi"><div class="bkpi-val" id="b_rev">—</div><div class="bkpi-lbl">ยอดขายรวม</div><div class="bkpi-ch" id="b_rev_ch"></div></div>
+        <div class="bkpi"><div class="bkpi-val" id="b_gp">—</div><div class="bkpi-lbl">Gross Profit</div><div class="bkpi-ch" id="b_gp_ch"></div></div>
+        <div class="bkpi"><div class="bkpi-val" id="b_ord">—</div><div class="bkpi-lbl">Orders</div><div class="bkpi-ch" id="b_ord_ch"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="kpi-grid" id="s1_kpis"></div>
+  <div class="g21">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Revenue &amp; GP Trend</div><div class="card-sub">แนวโน้มรายเดือน</div></div></div><div class="ch240"><canvas id="c_trend"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">สัดส่วนบริษัท</div><div class="card-sub">Revenue split</div></div></div><div class="ch240"><canvas id="c_donut"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">⚠️ Risks</div></div></div><div id="s1_risks"></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">✅ Highlights</div></div></div><div id="s1_hl"></div></div>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="section" id="s2">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">Sales Analysis</div><div class="sec-period" id="s2p">ภาพรวม</div></div>
+  <div class="kpi-grid" id="s2_kpis"></div>
+  <div class="card"><div class="card-hdr"><div><div class="card-title">Monthly Revenue</div><div class="card-sub">Thai Phasith vs TPS Bearing</div></div></div><div class="ch260"><canvas id="c_mbar"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">GP Margin % Trend</div></div></div><div class="ch200"><canvas id="c_margin"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Quarterly Revenue</div></div></div><div class="ch200"><canvas id="c_qbar"></canvas></div></div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="section" id="s3">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">Customer Analysis</div><div class="sec-period" id="s3p">ภาพรวม</div></div>
+  <div class="kpi-grid" id="s3_kpis"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Top Products by Revenue</div></div></div>
+      <div class="co-toggle" id="custTog">
+        <div class="co-btn on" id="ct_th" onclick="setCustCo('THSITH')">Thai Phasith</div>
+        <div class="co-btn" id="ct_tp" onclick="setCustCo('TPS')">TPS Bearing</div>
+      </div>
+      <div class="tbl-scroll"><table class="tbl"><thead><tr><th>#</th><th>สินค้า</th><th>ยอดขาย</th><th>GP%</th></tr></thead><tbody id="tb_cust"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Unique Customers / Month</div></div></div><div class="ch240"><canvas id="c_cust_t"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-hdr"><div><div class="card-title">🚨 At-Risk Customers</div><div class="card-sub">ไม่มีออเดอร์ปีนี้ แต่มียอด Q4 ปีก่อน</div></div></div><div id="at_risk_list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div></div>
+</div>
+
+<!-- S4 -->
+<div class="section" id="s4">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">Inventory &amp; Stock Health</div><div class="sec-period" id="s4p">ข้อมูล ณ ปัจจุบัน</div></div>
+  <div class="stat-boxes" id="stock_kpis"></div>
+  <div class="card">
+    <div class="card-hdr"><div><div class="card-title">No. SKUs by Stocktype</div><div class="card-sub" id="s4_co_lbl">ทั้ง 2 บริษัท</div></div></div>
+    <div class="legend" id="st_legend"></div>
+    <div id="st_bars"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div><div class="card-title">Stock Value by Category and Stocktype</div></div></div>
+    <div class="tbl-scroll"><table class="tbl" id="tb_cat">
+      <thead><tr><th>Category</th><th>Stocktype</th><th>SKUs</th><th>Qty</th><th>Stock Cost</th></tr></thead>
+      <tbody id="tb_cat_body"></tbody>
+    </table></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">🔴 Dead Stock Top 20</div></div></div>
+      <div class="co-toggle" id="invTog">
+        <div class="co-btn on" id="it_th" onclick="setInvCo('THSITH')">Thai Phasith</div>
+        <div class="co-btn" id="it_tp" onclick="setInvCo('TPS')">TPS Bearing</div>
+      </div>
+      <div class="tbl-scroll"><table class="tbl"><thead><tr><th>#</th><th>สินค้า</th><th>Category</th><th>Qty</th><th>Cost</th></tr></thead><tbody id="tb_dead"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">📦 Top Active Stock Qty</div></div></div>
+      <div class="co-toggle">
+        <div class="co-btn on" id="iq_th" onclick="setInvQCo('THSITH')">Thai Phasith</div>
+        <div class="co-btn" id="iq_tp" onclick="setInvQCo('TPS')">TPS Bearing</div>
+      </div>
+      <div class="ch300"><canvas id="c_stock_bar"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div><div class="card-title">📊 Top Products by Sales Revenue</div></div></div>
+    <div class="co-toggle">
+      <div class="co-btn on" id="ip_th" onclick="setProdCo('THSITH')">Thai Phasith</div>
+      <div class="co-btn" id="ip_tp" onclick="setProdCo('TPS')">TPS Bearing</div>
+    </div>
+    <div class="tbl-scroll"><table class="tbl"><thead><tr><th>#</th><th>สินค้า</th><th>Revenue</th><th>GP%</th><th>Qty Sold</th></tr></thead><tbody id="tb_prod"></tbody></table></div>
+  </div>
+</div>
+
+<!-- S5 -->
+<div class="section" id="s5">
+  <div class="sec-hdr"><div class="sec-dot"></div><div class="sec-title">Cash Flow</div><div class="sec-period" id="s5p">ภาพรวม</div></div>
+  <div class="kpi-grid" id="s5_kpis"></div>
+  <div class="card"><div class="card-hdr"><div><div class="card-title">Revenue vs GP Monthly</div></div></div><div class="ch260"><canvas id="c_ocf"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Cumulative GP YTD</div></div></div><div class="ch200"><canvas id="c_cumgp"></canvas></div></div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Monthly GP by Company</div></div></div><div class="ch200"><canvas id="c_gp_co"></canvas></div></div>
+  </div>
+</div>
+
+</div>
+<div class="footer">TPS Group · CEO Dashboard · <span id="footDate"></span> · <span id="data-updated"></span></div>
+</div></div></div></div>
+
+<script>
+Chart.defaults.color='#64748b';
+Chart.defaults.borderColor='rgba(0,0,0,.06)';
+Chart.defaults.font.family="'Inter','Sarabun',sans-serif";
+
+// ── CSV loader ────────────────────────────────────────────────────────────────
+// กำหนด path ของ CSV — เมื่ออัพขึ้น GitHub ให้เปลี่ยนเป็น path จริง เช่น 'data/monthly_sales.csv'
+const CSV_BASE = 'data/';
+
+function parseCSV(text) {
+  const lines = text.replace(/\r/g,'').split('\n');
+  let headerIdx = -1;
+  // หาแถว header จริง (แถวแรกที่ไม่ใช่ title/note)
+  const knownHeaders = ['Year','Company','ProductCode','Customer_name'];
+  for(let i=0;i<lines.length;i++){
+    if(knownHeaders.some(h=>lines[i].includes(h))){headerIdx=i;break;}
+  }
+  if(headerIdx<0) return [];
+  const headers = lines[headerIdx].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const rows = [];
+  for(let i=headerIdx+1;i<lines.length;i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+    // parse CSV with quoted fields
+    const vals = [];
+    let cur='', inQ=false;
+    for(let c=0;c<line.length;c++){
+      if(line[c]==='"'){inQ=!inQ;}
+      else if(line[c]===','&&!inQ){vals.push(cur.trim());cur='';}
+      else cur+=line[c];
+    }
+    vals.push(cur.trim());
+    if(vals.length<2||vals.every(v=>!v)) continue;
+    const obj={};
+    headers.forEach((h,i)=>{ obj[h]=vals[i]||''});
+    // skip sub-header rows (rows that contain column descriptions)
+    if(obj.Year&&isNaN(+obj.Year)&&obj.Year!=='') continue;
+    if(obj.Company&&obj.Company!=='THSITH'&&obj.Company!=='TPS') continue;
+    rows.push(obj);
+  }
+  return rows;
+}
+
+async function loadCSV(name) {
+  const url = CSV_BASE + name;
+  document.getElementById('loader-status').textContent = 'โหลด ' + name;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(url + ' — ' + r.status);
+  return parseCSV(await r.text());
+}
+
+// ── Data store ────────────────────────────────────────────────────────────────
+let D = { monthly:[], top_products:[], at_risk:[], stock:{ALL:{},THSITH:{},TPS:{}} };
+
+function buildStockByCompany(rows){
+  const cos = ['THSITH','TPS','ALL'];
+  const result = {};
+  cos.forEach(co=>{
+    const r = co==='ALL' ? rows : rows.filter(x=>x.Company===co);
+    const stMap = {};
+    r.forEach(x=>{
+      const st = x.StockType||'Unknown';
+      if(!stMap[st]) stMap[st]={StockType:st,sku_count:0,qty:0,cost:0};
+      stMap[st].sku_count++;
+      stMap[st].qty += +x.Qty||0;
+      stMap[st].cost += +x.TotalCost||0;
+    });
+    const catMap = {};
+    r.forEach(x=>{
+      const key = (x.Category||'Others')+'|'+( x.StockType||'Unknown');
+      if(!catMap[key]) catMap[key]={Category:x.Category||'Others',StockType:x.StockType||'Unknown',sku_count:0,qty:0,cost:0};
+      catMap[key].sku_count++;
+      catMap[key].qty += +x.Qty||0;
+      catMap[key].cost += +x.TotalCost||0;
+    });
+    const dead = r.filter(x=>x.StockType==='Dead Stocks').sort((a,b)=>(+b.Qty||0)-(+a.Qty||0));
+    const active = r.filter(x=>x.StockType!=='Dead Stocks').sort((a,b)=>(+b.Qty||0)-(+a.Qty||0));
+    const totalQty = r.reduce((s,x)=>s+(+x.Qty||0),0);
+    const totalCost = r.reduce((s,x)=>s+(+x.TotalCost||0),0);
+    const totalVal = r.reduce((s,x)=>s+(+x.StockValue||0),0);
+    const activeSku = r.filter(x=>x.StockType!=='Dead Stocks').length;
+    const deadSku = r.filter(x=>x.StockType==='Dead Stocks').length;
+    const avgDOH = r.filter(x=>+x.DOH<9000).reduce((s,x,_,a)=>s+(+x.DOH||0)/a.length,0);
+    result[co]={
+      overall_doh: +avgDOH.toFixed(1),
+      stock_qty: totalQty,
+      stock_cost: totalCost,
+      stock_value: totalVal||totalCost*1.3,
+      active_sku: activeSku,
+      total_sku: r.length,
+      shortage_cnt: 0,
+      shortage_rate: 0,
+      stocktype_summary: Object.values(stMap),
+      cat_stocktype: Object.values(catMap),
+      dead_top: dead.slice(0,20).map(x=>({ProductCode:x.ProductCode,ProductName:x.ProductName,Category:x.Category||'Others',Qty:+x.Qty||0,TotalCost:+x.TotalCost||0,StockType:x.StockType})),
+      active_top_qty: active.slice(0,15).map(x=>({ProductCode:x.ProductCode,ProductName:x.ProductName,Category:x.Category||'Others',Qty:+x.Qty||0,StockType:x.StockType,DOH:+x.DOH||0,TotalCost:+x.TotalCost||0})),
+    };
+  });
+  return result;
+}
+
+async function initData(){
+  try {
+    const [ms, tp, st, ar] = await Promise.all([
+      loadCSV('monthly_sales.csv'),
+      loadCSV('top_products.csv'),
+      loadCSV('stock.csv'),
+      loadCSV('at_risk_customers.csv'),
+    ]);
+    D.monthly = ms.map(r=>({
+      Year:+r.Year, Month:+r.Month, Quarter:+r.Quarter||Math.ceil(+r.Month/3),
+      Company:r.Company, Revenue:+r.Revenue||0, GP:+r.GP||0,
+      Orders:+r.Orders||0, Customers:+r.Customers||0, Qty:+r.Qty||0
+    })).filter(r=>r.Year>0&&r.Company);
+    D.top_products = tp.map(r=>({
+      Company:r.Company, Product:r.Product||r.ProductName||r['Product Name']||'',
+      revenue:+r.Revenue||0, gp:+r.GP||0, qty:+r.Qty||0
+    })).filter(r=>r.Company&&r.revenue>0);
+    D.at_risk = ar.map(r=>({
+      Company:r.Company, Customer_name:r.Customer_name||r.CustomerName||'',
+      prev_rev:+r.prev_rev||0
+    })).filter(r=>r.Company&&r.prev_rev>0);
+    D.stock = buildStockByCompany(st);
+
+    // populate year filter dynamically
+    const years = [...new Set(D.monthly.map(r=>r.Year))].sort();
+    const yrSel = document.getElementById('f_yr');
+    years.forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; yrSel.appendChild(o); });
+
+    // mark data updated time
+    document.getElementById('data-updated').textContent = 'ข้อมูล ณ '+new Date().toLocaleDateString('th-TH');
+
+    document.getElementById('loading-overlay').classList.add('hidden');
+    renderAll();
+  } catch(e) {
+    document.getElementById('loading-overlay').classList.add('hidden');
+    const errEl = document.getElementById('data-error');
+    errEl.style.display='block';
+    document.getElementById('error-msg').textContent = ' '+e.message+' — ตรวจสอบว่าไฟล์ CSV อยู่ใน folder data/ ถูกต้อง';
+    renderAll(); // render with empty data
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const MN=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+let F={co:'ALL',yr:'ALL',q:'ALL',mo:'ALL'};
+let custCo='THSITH',invCo='THSITH',invQCo='THSITH',prodCo='THSITH';
+const charts={};
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':Math.round(n).toLocaleString();
+const pct=(a,b)=>b>0?(a/b*100).toFixed(1):'0.0';
+const rgba=(h,a)=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgba(${r},${g},${b},${a})`};
+
+function getFiltered(){
+  return D.monthly.filter(r=>{
+    if(F.co!=='ALL'&&r.Company!==F.co) return false;
+    if(F.yr!=='ALL'&&r.Year!==+F.yr) return false;
+    if(F.q!=='ALL'&&r.Quarter!==+F.q) return false;
+    if(F.mo!=='ALL'&&r.Month!==+F.mo) return false;
+    return true;
+  });
+}
+function agg(rows){return rows.reduce((a,r)=>({revenue:a.revenue+r.Revenue,gp:a.gp+r.GP,orders:a.orders+r.Orders,customers:Math.max(a.customers,r.Customers),qty:a.qty+r.Qty}),{revenue:0,gp:0,orders:0,customers:0,qty:0})}
+function mmap(rows){const m={};rows.forEach(r=>{const k=`${r.Year}-${String(r.Month).padStart(2,'0')}`;if(!m[k])m[k]={revenue:0,gp:0,orders:0,customers:0,qty:0};m[k].revenue+=r.Revenue;m[k].gp+=r.GP;m[k].orders+=r.Orders;m[k].qty+=r.Qty;m[k].customers=Math.max(m[k].customers,r.Customers)});return m}
+const mkeys=m=>Object.keys(m).sort();
+const mlbl=keys=>keys.map(k=>{const[y,mo]=k.split('-');return MN[+mo]+(keys.length>12?`'${y.slice(2)}`:'')}); 
+function plbl(){const p=[];if(F.co!=='ALL')p.push(F.co==='THSITH'?'Thai Phasith':'TPS Bearing');if(F.yr!=='ALL')p.push(F.yr);if(F.q!=='ALL')p.push('Q'+F.q);if(F.mo!=='ALL')p.push(MN[+F.mo]);return p.length?p.join(' · '):'ภาพรวมทั้งหมด'}
+function mkChart(id,type,data,opts={}){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id);if(!ctx)return;
+  charts[id]=new Chart(ctx,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:10,padding:10}}},scales:type==='doughnut'||type==='pie'?undefined:{x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45,maxTicksLimit:14}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}},...opts}});
+}
+const kpiHtml=cards=>cards.map(c=>`<div class="kpi-card"><div class="kpi-icon" style="background:${c.bg}">${c.ic}</div><div class="kpi-val">${c.val}</div><div class="kpi-lbl">${c.lbl}</div><div class="kpi-sub">${c.sub}</div></div>`).join('');
+
+// ── Render functions (same logic as original dashboard) ───────────────────────
+function renderS1(rows){
+  const a=agg(rows),lbl=plbl();
+  const thA=agg(rows.filter(r=>r.Company==='THSITH')),tpA=agg(rows.filter(r=>r.Company==='TPS'));
+  ['s1p','s2p','s3p','s5p'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=lbl});
+  document.getElementById('fLabel').textContent=lbl;
+  document.getElementById('sbPeriod').textContent=lbl;
+  document.getElementById('b_co').textContent=F.co==='ALL'?'Thai Phasith & TPS Bearing':F.co==='THSITH'?'Thai Phasith':'TPS Bearing';
+  document.getElementById('b_per').textContent=lbl||(D.monthly.length?`${Math.min(...D.monthly.map(r=>r.Year))}–${Math.max(...D.monthly.map(r=>r.Year))}`:'—');
+  document.getElementById('b_rev').textContent='฿'+fmt(a.revenue);
+  document.getElementById('b_gp').textContent='฿'+fmt(a.gp);
+  document.getElementById('b_gp_ch').textContent='GP '+pct(a.gp,a.revenue)+'%';
+  document.getElementById('b_ord').textContent=a.orders.toLocaleString();
+  document.getElementById('s1_kpis').innerHTML=kpiHtml([
+    {ic:'🏢',bg:'#eff6ff',val:'฿'+fmt(thA.revenue),lbl:'Thai Phasith',sub:'GP '+pct(thA.gp,thA.revenue)+'%'},
+    {ic:'🏬',bg:'#e0f2fe',val:'฿'+fmt(tpA.revenue),lbl:'TPS Bearing',sub:'GP '+pct(tpA.gp,tpA.revenue)+'%'},
+    {ic:'📋',bg:'#fffbeb',val:a.orders.toLocaleString(),lbl:'Total Orders',sub:'AOV ฿'+fmt(a.revenue/Math.max(a.orders,1))},
+    {ic:'📈',bg:'#ecfdf5',val:pct(a.gp,a.revenue)+'%',lbl:'GP Margin',sub:'฿'+fmt(a.gp)},
+    {ic:'👥',bg:'#dbeafe',val:a.customers.toLocaleString(),lbl:'Customers',sub:'Unique / period'},
+  ]);
+  const m=mmap(rows),keys=mkeys(m),lbls=mlbl(keys);
+  mkChart('c_trend','line',{labels:lbls,datasets:[
+    {label:'Revenue',data:keys.map(k=>m[k].revenue),borderColor:'#1e6fd9',backgroundColor:rgba('#1e6fd9',.07),tension:.4,fill:true,pointRadius:2},
+    {label:'GP',data:keys.map(k=>m[k].gp),borderColor:'#059669',backgroundColor:rgba('#059669',.06),tension:.4,fill:true,pointRadius:2}
+  ]},{scales:{y:{ticks:{callback:v=>'฿'+fmt(v)}}}});
+  const thT=rows.filter(r=>r.Company==='THSITH').reduce((s,r)=>s+r.Revenue,0);
+  const tpT=rows.filter(r=>r.Company==='TPS').reduce((s,r)=>s+r.Revenue,0);
+  mkChart('c_donut','doughnut',{labels:['Thai Phasith','TPS Bearing'],datasets:[{data:[thT,tpT],backgroundColor:['#1e6fd9','#0891b2'],borderWidth:0}]},{cutout:'62%',plugins:{tooltip:{callbacks:{label:c=>` ฿${fmt(c.raw)} (${pct(c.raw,thT+tpT)}%)`}}}});
+  const years=[...new Set(D.monthly.map(r=>r.Year))].sort();
+  const maxYr=years[years.length-1]||new Date().getFullYear();
+  const q1cur=D.monthly.filter(r=>r.Year===maxYr&&r.Quarter===1).reduce((s,r)=>s+r.Revenue,0);
+  const q1prev=D.monthly.filter(r=>r.Year===maxYr-1&&r.Quarter===1).reduce((s,r)=>s+r.Revenue,0);
+  const yoy=q1prev>0?((q1cur-q1prev)/q1prev*100).toFixed(1):0;
+  const stk=D.stock[F.co]||D.stock['ALL']||{dead_sku:0,active_sku:0,total_sku:0};
+  document.getElementById('s1_risks').innerHTML=`
+    <div class="alert alert-warn"><div class="alert-icon">⚠️</div><div><div class="a-title">Customer Concentration</div><div class="a-sub">Top 3 คิดเป็น ~40%+ ของยอดขาย</div></div></div>
+    <div class="alert alert-danger"><div class="alert-icon">🔴</div><div><div class="a-title">Dead Stock ${fmt((stk.stocktype_summary||[]).find(s=>s.StockType==='Dead Stocks')?.sku_count||0)} SKUs</div><div class="a-sub">ไม่มีการขาย — ควรพิจารณา clearance</div></div></div>
+    <div class="alert alert-warn"><div class="alert-icon">⚠️</div><div><div class="a-title">GP Margin ต่างกัน</div><div class="a-sub">TH ${pct(thA.gp,thA.revenue)}% vs TPS ${pct(tpA.gp,tpA.revenue)}%</div></div></div>`;
+  document.getElementById('s1_hl').innerHTML=`
+    <div class="alert alert-ok"><div class="alert-icon">🚀</div><div><div class="a-title">Q1-${maxYr} YoY +${yoy}%</div><div class="a-sub">เทียบ Q1-${maxYr-1} รวมทั้งกลุ่ม</div></div></div>
+    <div class="alert alert-ok"><div class="alert-icon">🏆</div><div><div class="a-title">Active SKUs ${fmt(stk.active_sku||0)} รายการ</div><div class="a-sub">จากทั้งหมด ${fmt(stk.total_sku||0)} SKUs</div></div></div>
+    <div class="alert alert-info"><div class="alert-icon">📦</div><div><div class="a-title">At-Risk Customers ${D.at_risk.length} ราย</div><div class="a-sub">ต้องติดตามเพื่อรักษาฐานลูกค้า</div></div></div>`;
+}
+
+function renderS2(rows){
+  const a=agg(rows),m=mmap(rows),keys=mkeys(m),lbls=mlbl(keys);
+  const thA=agg(rows.filter(r=>r.Company==='THSITH')),tpA=agg(rows.filter(r=>r.Company==='TPS'));
+  let bK='',bV=0;keys.forEach(k=>{if(m[k].revenue>bV){bV=m[k].revenue;bK=k;}});
+  const[by,bm]=bK?bK.split('-'):['—','—'];
+  document.getElementById('s2_kpis').innerHTML=kpiHtml([
+    {ic:'💰',bg:'#eff6ff',val:'฿'+fmt(a.revenue),lbl:'Total Revenue',sub:'฿'+fmt(a.revenue/Math.max(keys.length,1))+'/เดือน'},
+    {ic:'📊',bg:'#ecfdf5',val:pct(a.gp,a.revenue)+'%',lbl:'GP Margin',sub:'TH '+pct(thA.gp,thA.revenue)+'% / TPS '+pct(tpA.gp,tpA.revenue)+'%'},
+    {ic:'📋',bg:'#fffbeb',val:a.orders.toLocaleString(),lbl:'Total Orders',sub:'AOV ฿'+fmt(a.revenue/Math.max(a.orders,1))},
+    {ic:'🏆',bg:'#fef2f2',val:bK?MN[+bm]+(by!=='—'?`'${by.slice(2)}`:''): '—',lbl:'Best Month',sub:'฿'+fmt(bV)},
+  ]);
+  const allM=D.monthly.filter(r=>{if(F.yr!=='ALL'&&r.Year!==+F.yr)return false;if(F.q!=='ALL'&&r.Quarter!==+F.q)return false;if(F.mo!=='ALL'&&r.Month!==+F.mo)return false;return true;});
+  const allK=[...new Set(allM.map(r=>`${r.Year}-${String(r.Month).padStart(2,'0')}` ))].sort();
+  mkChart('c_mbar','bar',{labels:mlbl(allK),datasets:[
+    {label:'Thai Phasith',data:allK.map(k=>{const[y,mo]=k.split('-');const r=allM.find(r=>r.Company==='THSITH'&&r.Year===+y&&r.Month===+mo);return r?r.Revenue:0}),backgroundColor:rgba('#1e6fd9',.82),borderRadius:3},
+    {label:'TPS Bearing', data:allK.map(k=>{const[y,mo]=k.split('-');const r=allM.find(r=>r.Company==='TPS'&&r.Year===+y&&r.Month===+mo);return r?r.Revenue:0}),backgroundColor:rgba('#0891b2',.82),borderRadius:3},
+  ]},{scales:{y:{ticks:{callback:v=>'฿'+fmt(v)}}}});
+  mkChart('c_margin','line',{labels:lbls,datasets:[{label:'GP %',data:keys.map(k=>m[k].revenue>0?+(m[k].gp/m[k].revenue*100).toFixed(1):0),borderColor:'#1e6fd9',backgroundColor:rgba('#1e6fd9',.08),tension:.4,fill:true,pointRadius:2}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'},suggestedMin:10,suggestedMax:35}}});
+  const qM={};rows.forEach(r=>{const k=`${r.Year}-Q${r.Quarter}`;if(!qM[k])qM[k]=0;qM[k]+=r.Revenue});
+  const qK=Object.keys(qM).sort();
+  mkChart('c_qbar','bar',{labels:qK,datasets:[{label:'Revenue',data:qK.map(k=>qM[k]),backgroundColor:qK.map((_,i)=>[rgba('#1e6fd9',.82),rgba('#0891b2',.82),rgba('#4f46e5',.82),rgba('#059669',.82)][i%4]),borderRadius:3}]},{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'฿'+fmt(v)}}}});
+}
+
+function renderS3(rows){
+  const a=agg(rows),m=mmap(rows),keys=mkeys(m),lbls=mlbl(keys);
+  document.getElementById('s3_kpis').innerHTML=kpiHtml([
+    {ic:'👥',bg:'#eff6ff',val:a.customers.toLocaleString(),lbl:'Active Customers',sub:'Unique / period'},
+    {ic:'📋',bg:'#fffbeb',val:a.orders.toLocaleString(),lbl:'Orders',sub:'AOV ฿'+fmt(a.revenue/Math.max(a.orders,1))},
+    {ic:'🚨',bg:'#fef2f2',val:D.at_risk.length,lbl:'At-Risk',sub:'ไม่มีออเดอร์ปีนี้'},
+    {ic:'📊',bg:'#ecfdf5',val:pct(a.gp,a.revenue)+'%',lbl:'GP Margin',sub:'Overall'},
+  ]);
+  renderCustTable(F.co!=='ALL'?F.co:custCo);
+  mkChart('c_cust_t','line',{labels:lbls,datasets:[
+    {label:'Thai Phasith',data:keys.map(k=>{const[y,mo]=k.split('-');const r=rows.find(r=>r.Company==='THSITH'&&r.Year===+y&&r.Month===+mo);return r?r.Customers:null}),borderColor:'#1e6fd9',tension:.4,pointRadius:2,fill:false,spanGaps:true},
+    {label:'TPS Bearing', data:keys.map(k=>{const[y,mo]=k.split('-');const r=rows.find(r=>r.Company==='TPS'&&r.Year===+y&&r.Month===+mo);return r?r.Customers:null}),borderColor:'#0891b2',tension:.4,pointRadius:2,fill:false,spanGaps:true},
+  ]},{});
+  const tog=document.getElementById('custTog');if(tog)tog.style.display=F.co!=='ALL'?'none':'flex';
+  document.getElementById('at_risk_list').innerHTML=D.at_risk.length?D.at_risk.map(r=>`<div class="alert alert-danger"><div class="alert-icon">🔴</div><div><div class="a-title" style="font-size:11px">${r.Customer_name}</div><div class="a-sub">${r.Company==='THSITH'?'Thai Phasith':'TPS Bearing'} · ฿${fmt(r.prev_rev)}</div></div></div>`).join(''):'<div style="color:var(--text3);font-size:12px;padding:12px">ไม่มีข้อมูล</div>';
+}
+
+function renderCustTable(co){
+  custCo=co;
+  document.getElementById('ct_th').className='co-btn'+(co==='THSITH'?' on':'');
+  document.getElementById('ct_tp').className='co-btn'+(co==='TPS'?' on':'');
+  const prods=D.top_products.filter(r=>r.Company===co);
+  document.getElementById('tb_cust').innerHTML=prods.length?prods.slice(0,10).map((r,i)=>{
+    const g=+pct(r.gp,r.revenue);const c=g>=25?'#059669':g>=15?'#d97706':'#dc2626';
+    return`<tr><td class="rank">${i+1}</td><td><div class="cell-name" title="${r.Product}">${r.Product.length>35?r.Product.slice(0,35)+'…':r.Product}</div></td><td style="font-weight:600">฿${fmt(r.revenue)}</td><td><span class="badge" style="background:${c}18;color:${c}">${g}%</span></td></tr>`;
+  }).join(''):'<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:16px">ไม่มีข้อมูล</td></tr>';
+}
+function setCustCo(co){renderCustTable(co)}
+
+const ST_COLORS={'Shortage':'#ef4444','Low Stocks':'#f97316','Healthy Stocks':'#22c55e','Over Stocks':'#3b82f6','Dead Stocks':'#94a3b8'};
+const ST_ORDER=['Shortage','Low Stocks','Healthy Stocks','Over Stocks','Dead Stocks'];
+
+function renderS4(){
+  const co=F.co==='ALL'?'ALL':F.co;
+  const stk=D.stock[co]||{overall_doh:0,stock_qty:0,stock_cost:0,stock_value:0,active_sku:0,total_sku:0,shortage_cnt:0,shortage_rate:0,stocktype_summary:[],cat_stocktype:[],dead_top:[],active_top_qty:[]};
+  document.getElementById('s4p').textContent=co==='ALL'?'Thai Phasith + TPS Bearing':co==='THSITH'?'Thai Phasith':'TPS Bearing';
+  document.getElementById('s4_co_lbl').textContent=co==='ALL'?'ทั้ง 2 บริษัท':co==='THSITH'?'Thai Phasith':'TPS Bearing';
+  document.getElementById('stock_kpis').innerHTML=`
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--indigo)">${stk.overall_doh}</div><div class="stat-box-lbl">Overall DOH</div><div class="stat-box-sub">วันเฉลี่ยสต๊อก</div></div>
+    <div class="stat-box"><div class="stat-box-val">${fmt(stk.stock_qty)}</div><div class="stat-box-lbl">Stock Qty</div><div class="stat-box-sub">ชิ้นทั้งหมด</div></div>
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">฿${fmt(stk.stock_value)}</div><div class="stat-box-lbl">Stock Value</div><div class="stat-box-sub">มูลค่าขาย (est.)</div></div>
+    <div class="stat-box"><div class="stat-box-val">฿${fmt(stk.stock_cost)}</div><div class="stat-box-lbl">Stock Cost</div><div class="stat-box-sub">ต้นทุน</div></div>
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${fmt(stk.active_sku)}</div><div class="stat-box-lbl">Active SKU</div><div class="stat-box-sub">จาก ${fmt(stk.total_sku)} ทั้งหมด</div></div>
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--amber)">${stk.shortage_rate}%</div><div class="stat-box-lbl">Shortage Rate</div><div class="stat-box-sub">${stk.shortage_cnt} SKUs</div></div>`;
+  const activeTypes=[...new Set((stk.stocktype_summary||[]).map(r=>r.StockType))];
+  const orderedTypes=ST_ORDER.filter(t=>activeTypes.includes(t));
+  document.getElementById('st_legend').innerHTML=orderedTypes.map(t=>`<div class="legend-item"><div class="legend-dot" style="background:${ST_COLORS[t]||'#aaa'}"></div>${t}</div>`).join('');
+  const cosToShow=co==='ALL'?['THSITH','TPS']:[co];
+  const coLabels={'THSITH':'Thai Phasith','TPS':'TPS Bearing'};
+  let barsHtml='';
+  cosToShow.forEach(c=>{
+    const s=D.stock[c]||{total_sku:0,stocktype_summary:[]};
+    const total=s.total_sku||1;
+    const stMap={};(s.stocktype_summary||[]).forEach(r=>stMap[r.StockType]=r);
+    const segs=orderedTypes.map(t=>{
+      const d=stMap[t];if(!d)return'';
+      const p2=(d.sku_count/total*100).toFixed(1);
+      return`<div class="stock-bar-seg" style="width:${p2}%;background:${ST_COLORS[t]||'#aaa'}" title="${t}: ${fmt(d.sku_count)} SKUs (${p2}%)">${d.sku_count/total>0.07?fmt(d.sku_count):''}</div>`;
+    }).join('');
+    barsHtml+=`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px"><span>${coLabels[c]}</span><span style="color:var(--text3)">${fmt(s.total_sku)} SKUs</span></div><div class="stock-bar-wrap">${segs}</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${orderedTypes.filter(t=>stMap[t]).map(t=>`<span style="font-size:10px;color:var(--text3)">${t}: <b style="color:${ST_COLORS[t]}">${fmt(stMap[t].sku_count)}</b></span>`).join('')}</div></div>`;
+  });
+  document.getElementById('st_bars').innerHTML=barsHtml;
+  const catRows=stk.cat_stocktype||[];
+  const cats=[...new Set(catRows.map(r=>r.Category))].sort();
+  let tbHtml='';
+  cats.forEach(cat=>{
+    const cr=catRows.filter(r=>r.Category===cat);
+    cr.forEach((r,i)=>{
+      const c=ST_COLORS[r.StockType]||'#aaa';
+      tbHtml+=`<tr>${i===0?`<td rowspan="${cr.length}" style="font-weight:600;vertical-align:top;border-right:1px solid var(--border)">${cat}</td>`:''}<td><span class="badge" style="background:${c}18;color:${c}">${r.StockType}</span></td><td style="font-weight:600">${fmt(r.sku_count)}</td><td>${fmt(r.qty)}</td><td>฿${fmt(r.cost)}</td></tr>`;
+    });
+    const tot=cr.reduce((a,r)=>({sku:a.sku+r.sku_count,qty:a.qty+r.qty,cost:a.cost+r.cost}),{sku:0,qty:0,cost:0});
+    tbHtml+=`<tr style="background:var(--surface2);font-weight:600;border-top:1px solid var(--border)"><td colspan="2" style="font-size:11px;color:var(--text3)">รวม ${cat}</td><td>${fmt(tot.sku)}</td><td>${fmt(tot.qty)}</td><td>฿${fmt(tot.cost)}</td></tr>`;
+  });
+  document.getElementById('tb_cat_body').innerHTML=tbHtml||'<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:16px">ไม่มีข้อมูล</td></tr>';
+  renderDeadTable(co!=='ALL'?co:invCo);
+  renderStockQtyChart(co!=='ALL'?co:invQCo);
+  renderProdTable(co!=='ALL'?co:prodCo);
+  const tog=document.getElementById('invTog');if(tog)tog.style.display=co!=='ALL'?'none':'flex';
+}
+
+function renderDeadTable(co){
+  invCo=co;
+  document.getElementById('it_th').className='co-btn'+(co==='THSITH'?' on':'');
+  document.getElementById('it_tp').className='co-btn'+(co==='TPS'?' on':'');
+  const dead=(D.stock[co]||{dead_top:[]}).dead_top||[];
+  document.getElementById('tb_dead').innerHTML=dead.length?dead.slice(0,15).map((r,i)=>`<tr><td class="rank">${i+1}</td><td><div class="cell-name" title="${r.ProductCode}">${r.ProductCode}</div><div style="font-size:10px;color:var(--text3)">${r.ProductName||''}</div></td><td>${r.Category||''}</td><td style="font-weight:600">${fmt(r.Qty)}</td><td>฿${fmt(r.TotalCost)}</td></tr>`).join(''):'<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:16px">ไม่มีข้อมูล</td></tr>';
+}
+function renderStockQtyChart(co){
+  invQCo=co;
+  document.getElementById('iq_th').className='co-btn'+(co==='THSITH'?' on':'');
+  document.getElementById('iq_tp').className='co-btn'+(co==='TPS'?' on':'');
+  const items=((D.stock[co]||{active_top_qty:[]}).active_top_qty||[]).slice(0,15);
+  const stColors={'Healthy Stocks':'#22c55e','Low Stocks':'#f97316','Over Stocks':'#3b82f6','Shortage':'#ef4444'};
+  mkChart('c_stock_bar','bar',{labels:items.map(r=>r.ProductCode.length>20?r.ProductCode.slice(0,20)+'…':r.ProductCode),datasets:[{label:'Qty',data:items.map(r=>r.Qty),backgroundColor:items.map(r=>stColors[r.StockType]||'#94a3b8'),borderRadius:3}]},{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const r=items[c.dataIndex];return` Qty: ${fmt(r.Qty)} | ${r.StockType} | DOH: ${r.DOH}d`}}}},scales:{x:{ticks:{callback:v=>fmt(v)}},y:{ticks:{font:{size:9}}}}});
+}
+function renderProdTable(co){
+  prodCo=co;
+  document.getElementById('ip_th').className='co-btn'+(co==='THSITH'?' on':'');
+  document.getElementById('ip_tp').className='co-btn'+(co==='TPS'?' on':'');
+  const prods=D.top_products.filter(r=>r.Company===co);
+  document.getElementById('tb_prod').innerHTML=prods.length?prods.slice(0,15).map((r,i)=>{
+    const g=+pct(r.gp,r.revenue);const c=g>=40?'#059669':g>=20?'#d97706':'#94a3b8';
+    return`<tr><td class="rank">${i+1}</td><td><div class="cell-name" title="${r.Product}">${r.Product.length>40?r.Product.slice(0,40)+'…':r.Product}</div></td><td style="font-weight:600">฿${fmt(r.revenue)}</td><td><span class="badge" style="background:${c}18;color:${c}">${g}%</span></td><td>${fmt(r.qty)}</td></tr>`;
+  }).join(''):'<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:16px">ไม่มีข้อมูล</td></tr>';
+}
+function setInvCo(co){renderDeadTable(co);renderStockQtyChart(co)}
+function setInvQCo(co){renderStockQtyChart(co)}
+function setProdCo(co){renderProdTable(co)}
+
+function renderS5(rows){
+  const a=agg(rows),m=mmap(rows),keys=mkeys(m),lbls=mlbl(keys);
+  document.getElementById('s5_kpis').innerHTML=kpiHtml([
+    {ic:'💰',bg:'#ecfdf5',val:'฿'+fmt(a.gp),lbl:'Total GP',sub:'GP '+pct(a.gp,a.revenue)+'%'},
+    {ic:'📊',bg:'#eff6ff',val:'฿'+fmt(a.revenue-a.gp),lbl:'COGS',sub:'ต้นทุนรวม'},
+    {ic:'📈',bg:'#fffbeb',val:'฿'+fmt(a.gp/Math.max(keys.length,1)),lbl:'Avg Monthly GP',sub:'เฉลี่ย/เดือน'},
+    {ic:'🔄',bg:'#fef2f2',val:pct(a.gp,a.revenue)+'%',lbl:'GP Margin',sub:'Overall'},
+  ]);
+  mkChart('c_ocf','bar',{labels:lbls,datasets:[
+    {label:'COGS',        data:keys.map(k=>+(m[k].revenue-m[k].gp).toFixed(0)),backgroundColor:rgba('#dc2626',.5),borderRadius:3},
+    {label:'Gross Profit',data:keys.map(k=>m[k].gp),backgroundColor:rgba('#059669',.78),borderRadius:3},
+  ]},{scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>'฿'+fmt(v)}}}});
+  const years=[...new Set(rows.map(r=>r.Year))].sort();
+  const yC=['#1e6fd9','#0891b2','#4f46e5','#059669'];
+  const cumDS=years.map((y,i)=>{
+    const yR=rows.filter(r=>r.Year===y),ym={};
+    yR.forEach(r=>{const k=String(r.Month).padStart(2,'0');if(!ym[k])ym[k]=0;ym[k]+=r.GP});
+    const mK=Object.keys(ym).sort();let cum=0;
+    return{label:String(y),data:mK.map(k=>{cum+=ym[k];return+cum.toFixed(0)}),borderColor:yC[i%4],tension:.4,fill:false,pointRadius:2};
+  });
+  mkChart('c_cumgp','line',{labels:['01','02','03','04','05','06','07','08','09','10','11','12'].map(mo=>MN[+mo]),datasets:cumDS},{scales:{y:{ticks:{callback:v=>'฿'+fmt(v)}}}});
+  mkChart('c_gp_co','bar',{labels:lbls,datasets:[
+    {label:'Thai Phasith GP',data:keys.map(k=>{const[y,mo]=k.split('-');const r=rows.find(r=>r.Company==='THSITH'&&r.Year===+y&&r.Month===+mo);return r?r.GP:0}),backgroundColor:rgba('#1e6fd9',.82),borderRadius:3},
+    {label:'TPS Bearing GP', data:keys.map(k=>{const[y,mo]=k.split('-');const r=rows.find(r=>r.Company==='TPS'&&r.Year===+y&&r.Month===+mo);return r?r.GP:0}),backgroundColor:rgba('#0891b2',.82),borderRadius:3},
+  ]},{scales:{y:{ticks:{callback:v=>'฿'+fmt(v)}}}});
+}
+
+let activeTab='s1';
+function showTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  activeTab=id;renderAll();
+}
+function applyFilters(){
+  F.co=document.getElementById('f_co').value;
+  F.yr=document.getElementById('f_yr').value;
+  F.q=document.getElementById('f_q').value;
+  F.mo=document.getElementById('f_mo').value;
+  if(F.co!=='ALL'){custCo=F.co;invCo=F.co;prodCo=F.co;}
+  renderAll();
+}
+function resetFilters(){
+  ['f_co','f_yr','f_q','f_mo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='ALL'});
+  F={co:'ALL',yr:'ALL',q:'ALL',mo:'ALL'};
+  custCo='THSITH';invCo='THSITH';invQCo='THSITH';prodCo='THSITH';
+  renderAll();
+}
+function renderAll(){
+  const rows=getFiltered();
+  renderS1(rows);
+  if(activeTab==='s2')renderS2(rows);
+  if(activeTab==='s3')renderS3(rows);
+  if(activeTab==='s4')renderS4();
+  if(activeTab==='s5')renderS5(rows);
+}
+
+const now=new Date();
+const ds=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+document.getElementById('hdrDate').textContent=ds;
+document.getElementById('footDate').textContent=ds;
+
+// Start loading CSV
+initData();
+</script>
+</body>
+</html>
